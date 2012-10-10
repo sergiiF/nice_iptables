@@ -5,6 +5,7 @@ import argparse
 
 TAB = 4
 
+
 class IPTablesObject(object):
 
     def __init__(self, name=None):
@@ -19,19 +20,19 @@ class Rule(object):
         self.args = args
 
     def format(self, level):
-        ret_value = ' '*TAB*level
+        ret_value = ' ' * TAB * level
         if self.opts:
             ret_value += '%s' % self.opts
         if self.to_chain is not None:
-            ret_value += '-> %s' % self.to_chain.format(level+1, self.args)
+            ret_value += '-> %s' % self.to_chain.format(level + 1, self.args)
         return ret_value
 
 
 class Chain(IPTablesObject):
 
-    def __init__(self, name, policy = None):
+    def __init__(self, name, policy=None):
         super(Chain, self).__init__(name)
-        self.rules = []
+        self.rules = list()
         self.policy = policy
 
     def parse(self, dump, chains):
@@ -42,7 +43,7 @@ class Chain(IPTablesObject):
 
     def format(self, level, args=''):
         args = args.strip('\n')
-        rules = [rule.format(level+1) for rule in self.rules]
+        rules = [rule.format(level + 1) for rule in self.rules]
         if self.policy:
             ret_value = '%s %s\n' % (self.name, self.policy)
         elif args:
@@ -57,7 +58,7 @@ class Chain(IPTablesObject):
 class Table(IPTablesObject):
 
     build_in_chains = ['DROP', 'ACCEPT', 'LOG', 'RETURN', 'DNAT', 'SNAT',
-                       'MASQUERADE', 'REJECT']
+                       'MASQUERADE', 'REJECT', 'CHECKSUM']
 
     def __init__(self, name):
         super(Table, self).__init__(name)
@@ -91,9 +92,12 @@ class Table(IPTablesObject):
         ret = [chain[1].format(0) for chain in self.root]
         return separator + separator.join(ret)
 
+
 if __name__ == '__main__':
     tables = ('nat', 'filter', 'mangle', 'raw', 'security')
-    parser = argparse.ArgumentParser(description='Prints iptables in nice and cozy way.\nSupported tables: {%s}' % '|'.join(tables)) 
+    descr = ('Prints iptables in nice and cozy way.\nSupported tables: {%s}' %
+             '|'.join(tables))
+    parser = argparse.ArgumentParser(description=descr)
     parser.add_argument("-t", "--table", dest="table", default="filter",
                         help="table to show")
     options = parser.parse_args()
@@ -101,7 +105,7 @@ if __name__ == '__main__':
     table = options.table
 
     proc = subprocess.Popen(['sudo', 'iptables', '-t', table, '-S'],
-                    stdout=subprocess.PIPE, 
+                    stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
     out, err = proc.communicate()
     rc = proc.returncode
@@ -112,4 +116,3 @@ if __name__ == '__main__':
     t = Table(table)
     t.parse(out)
     print t.format()
-
