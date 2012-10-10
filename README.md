@@ -1,6 +1,9 @@
 nice_iptables
 =============
 
-Prints iptables in a nice way (for me)
+Prints iptables in a nice way.
 
-Usage: ./iptables.py {nat|filter|mangle|raw|security}
+Usage:
+-----
+
+    ./nice_iptables.py -t {nat|filter|mangle|raw|security}
