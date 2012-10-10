@@ -69,7 +69,7 @@ class Table(IPTablesObject):
         '''
         @type dump: string
         '''
-        for line in dump:
+        for line in dump.split('\n'):
             try:
                 if line.startswith('-P'):
                     _, name, policy = line.split()
