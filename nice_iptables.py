@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import subprocess
+import argparse
 
 TAB = 4
 
@@ -68,7 +69,7 @@ class Table(IPTablesObject):
         '''
         @type dump: string
         '''
-        for line in dump:
+        for line in dump.split('\n'):
             try:
                 if line.startswith('-P'):
                     _, name, policy = line.split()
@@ -92,12 +93,23 @@ class Table(IPTablesObject):
 
 if __name__ == '__main__':
     tables = ('nat', 'filter', 'mangle', 'raw', 'security')
-    if len(sys.argv) != 2 or sys.argv[1] not in tables:
-        print 'usage: iptables {%s}' % '|'.join(tables)
-        sys.exit()
-    proc = subprocess.Popen(['sudo', 'iptables', '-t', sys.argv[1], '-S'],
-                    stdout=subprocess.PIPE)
+    parser = argparse.ArgumentParser(description='Prints iptables in nice and cozy way.\nSupported tables: {%s}' % '|'.join(tables)) 
+    parser.add_argument("-t", "--table", dest="table", default="filter",
+                        help="table to show")
+    options = parser.parse_args()
 
-    t = Table(sys.argv[1])
-    t.parse(proc.stdout)
+    table = options.table
+
+    proc = subprocess.Popen(['sudo', 'iptables', '-t', table, '-S'],
+                    stdout=subprocess.PIPE, 
+                    stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+    rc = proc.returncode
+
+    if rc:
+        print err
+        sys.exit(1)
+    t = Table(table)
+    t.parse(out)
     print t.format()
+
