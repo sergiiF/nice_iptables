@@ -94,7 +94,7 @@ class Table(IPTablesObject):
 if __name__ == '__main__':
     tables = ('nat', 'filter', 'mangle', 'raw', 'security')
     parser = argparse.ArgumentParser(description='Prints iptables in nice and cozy way.\nSupported tables: {%s}' % '|'.join(tables)) 
-    parser.add_argument("-t", "--table", dest="table", default="filter"
+    parser.add_argument("-t", "--table", dest="table", default="filter",
                         help="table to show")
     options = parser.parse_args()
 
