@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+
+import argparse
+import subprocess
+from nice_iptables import tables as iptables
+
+
+if __name__ == '__main__':
+    tables = ('nat', 'filter', 'mangle', 'raw', 'security')
+    descr = ('Prints iptables in nice and cozy way.\nSupported tables: {%s}' %
+             '|'.join(tables))
+    parser = argparse.ArgumentParser(description=descr)
+    parser.add_argument("-t", "--table", dest="table", default="filter",
+                        help="table to show")
+    options = parser.parse_args()
+
+    table = options.table
+
+    proc = subprocess.Popen(['sudo', 'iptables', '-t', table, '-S'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+    rc = proc.returncode
+
+    if rc:
+        print err
+        sys.exit(1)
+    t = iptables.Table(table)
+    t.parse(out)
+    print t.format()

@@ -1,0 +1,6 @@
+/build/*
+/.idea/*
+/nice_iptables.egg-info/*
+/dist/*
+*.pyc
+*.*~
