@@ -93,26 +93,36 @@ class Table(IPTablesObject):
         return separator + separator.join(ret)
 
 
-if __name__ == '__main__':
+def run():
     tables = ('nat', 'filter', 'mangle', 'raw', 'security')
     descr = ('Prints iptables in nice and cozy way.\nSupported tables: {%s}' %
              '|'.join(tables))
     parser = argparse.ArgumentParser(description=descr)
     parser.add_argument("-t", "--table", dest="table", default="filter",
                         help="table to show")
+    parser.add_argument("-f", "--file", dest="file", default=None,
+                        help="file to be parsed")
     options = parser.parse_args()
 
     table = options.table
+    file = options.file
 
-    proc = subprocess.Popen(['sudo', 'iptables', '-t', table, '-S'],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
-    out, err = proc.communicate()
-    rc = proc.returncode
+    if file is None:
+        proc = subprocess.Popen(['sudo', 'iptables', '-t', table, '-S'],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        out, err = proc.communicate()
+        rc = proc.returncode
 
-    if rc:
-        print err
-        sys.exit(1)
+        if rc:
+            print err
+            sys.exit(1)
+    else:
+        with open(file) as f:
+            out = f.read()
     t = Table(table)
     t.parse(out)
     print t.format()
+
+if __name__ == '__main__':
+    run()
