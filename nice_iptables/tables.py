@@ -76,7 +76,7 @@ class Chain(IPTablesObject):
 class Table(IPTablesObject):
 
     build_in_chains = ['DROP', 'ACCEPT', 'LOG', 'RETURN', 'DNAT', 'SNAT',
-                       'MASQUERADE', 'REJECT', 'CHECKSUM']
+                       'MASQUERADE', 'REJECT', 'CHECKSUM', 'TRACE']
 
     def __init__(self, name):
         super(Table, self).__init__(name)
